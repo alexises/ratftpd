@@ -5,19 +5,33 @@ from sys import exit
 import json
 
 from ratftpd.config import Config
+from ratftpd.server import RatftpServer
 
-def runServer():
-    parser = ArgumentParser(description = "Real Advenced tftp server")
-    parser.add_argument("--conf", required=True, help="config file to load")
-    parser.add_argument("--foreground", help="launch server on interactive mode")
-    arg = parser.parse_args()
+class Ratftpd(object):
+    def __init__(self):
+        self.parseArg()
 
-    if not isfile(arg.conf):
-        print("unexistant config file")
-        return 1
-    with open(arg.conf, "r") as fd:
-        configJson = json.load(fd)
-    config = Config(configJson)
+    def parseArg(self):
+        parser = ArgumentParser(description = "Real Advenced tftp server")
+        parser.add_argument("--conf", required=True, help="config file to load")
+        parser.add_argument("--foreground", help="launch server on interactive mode")
+        arg = parser.parse_args()
+
+        if not isfile(arg.conf):
+            print("unexistant config file")
+            exit(1)
+        with open(arg.conf, "r") as fd:
+            configJson = json.load(fd)
+        self.config = Config(configJson)
+
+    def run(self):
+        server = RatftpServer(self.config.bind, self.config.port)
+        try:
+            server.run()
+        except KeyboardInterrupt:
+            server.close()
+        
 
 if __name__ == "__main__":
-    exit(runServer())
+    srv = Ratftpd()
+    srv.run()
