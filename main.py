@@ -23,6 +23,7 @@ class Ratftpd(object):
         with open(arg.conf, "r") as fd:
             configJson = json.load(fd)
         self.config = Config(configJson)
+        self.config.networks.pretyPrint()
 
     def run(self):
         server = RatftpServer(self.config.bind,
