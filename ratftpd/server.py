@@ -8,5 +8,5 @@ def print_server_stats(stats):
 
 class RatftpServer(BaseServer):
      ''' Base tftp server class '''
-     def __init__(self, bind, port):
-         super().__init__(bind, port, 5, 5, print_server_stats)
+     def __init__(self, bind, port, timeout, retry):
+         super().__init__(bind, port, timeout, retry, print_server_stats)

@@ -25,7 +25,10 @@ class Ratftpd(object):
         self.config = Config(configJson)
 
     def run(self):
-        server = RatftpServer(self.config.bind, self.config.port)
+        server = RatftpServer(self.config.bind,
+                              self.config.port,
+                              self.config.timeout,
+                              self.config.retry)
         try:
             server.run()
         except KeyboardInterrupt:
