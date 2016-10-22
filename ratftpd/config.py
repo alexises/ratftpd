@@ -1,4 +1,4 @@
-from ipaddress import ip_network
+from ipaddress import ip_network, ip_address
 from functools import cmp_to_key
 import logging
 
@@ -12,6 +12,7 @@ class Config(object):
         self.timeout = config.get("timeout", 5)
         self.retry = config.get("retry", 5)
         self.pidfile = config.get("pidfile", "ratftpd.pid")
+        self.maxConn = config.get("maxConn", 65535)
         networks = []
         for network in config.get('networks', []):
             networks.append(NetworkConfig(self, network))
@@ -31,7 +32,19 @@ class Config(object):
         for network in networks[1:]:
             self.networks.addChild(network)
         self.networks.makeTree(self)
-        
+
+    def getConfig(self, ip):
+        ip_subnet = ip_address(ip)
+        config = self.networks
+        while config.subnets:
+            for subnet in config.subnets:
+                if subnet.network.overlaps(ip_subnet):
+                    config = subnet
+                    break
+            else:
+                break
+        return config
+                    
 
 class NetworkConfig(object):
     ''' manage a configuration for a network '''
@@ -46,6 +59,7 @@ class NetworkConfig(object):
     def _setConfig(self):
         self.timeout = self._config.get('timeout', self.parent.timeout)
         self.retry = self._config.get('retry', self.parent.retry)
+        self.maxConn = self._config.get('maxConn', self.parent.maxConn)
         del self._config
 
     def addChild(self, child):
