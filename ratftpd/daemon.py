@@ -2,6 +2,7 @@ import sys, os, time, atexit
 import logging
 from signal import SIGTERM
  
+logger = logging.getLogger(__name__)
 class Daemon(object):
     """
     A generic daemon class.
@@ -26,10 +27,10 @@ class Daemon(object):
                 # exit first parent
                 os._exit(0)
         except OSError as e:
-            logging.error("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
+            logger.error("fork #1 failed: %d (%s)\n" % (e.errno, e.strerror))
             os._exit(1)
        
-        logging.debug("first fork ok")
+        logger.debug("first fork ok")
         # decouple from parent environment
         os.chdir("/")
         os.setsid()
@@ -42,9 +43,9 @@ class Daemon(object):
                 # exit from second parent
                 os._exit(0)
         except OSError as e:
-            logging.error("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
+            logger.error("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
             os._exit(1)
-        logging.debug("second fork ok")
+        logger.debug("second fork ok")
 
         # redirect standard open descriptors
         sys.stdout.flush()
@@ -68,7 +69,7 @@ class Daemon(object):
         """
         Start the daemon
         """
-        logging.info("start daemon")
+        logger.info("start daemon")
         # Check for a pidfile to see if the daemon already runs
         try:
             pf = open(self.pidfile,'r')
@@ -89,7 +90,7 @@ class Daemon(object):
         """
         Stop the daemon
         """
-        logging.info("stop process")
+        logger.info("stop process")
         # Get the pid from the pidfile
         try:
             pf = open(self.pidfile,'r')
@@ -100,7 +101,7 @@ class Daemon(object):
        
         if not pid:
             message = "pidfile %s does not exist. Daemon not running?"
-            logging.info(message)
+            logger.info(message)
             return # not an error in a restart
  
         # Try killing the daemon process       
@@ -112,7 +113,7 @@ class Daemon(object):
             err = str(err)
             if err.find("No such process") > 0:
                 if os.path.exists(self.pidfile):
-                    logging.debug("remove pid file")
+                    logger.debug("remove pid file")
                     os.remove(self.pidfile)
             else:
                 print(str(err))

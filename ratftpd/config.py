@@ -1,6 +1,8 @@
 from ipaddress import ip_network
 from functools import cmp_to_key
+import logging
 
+logger = logging.getLogger(__name__)
 class Config(object):
     ''' manage configuration '''
 
@@ -14,6 +16,7 @@ class Config(object):
         for network in config.get('networks', []):
             networks.append(NetworkConfig(self, network))
         self._sortNetwork(networks, config)
+        logger.info("load config")
 
     def _sortNetwork(self, networks, config):
         networks.sort()        
@@ -98,6 +101,6 @@ class NetworkConfig(object):
         return self._getNumeric(other) != 0
 
     def pretyPrint(self, level=0):
-        print("{0} {1} {2}".format("-" * level, str(self.network), len(self.subnets)))
+        logger.info("{0} {1} {2}".format("-" * level, str(self.network), len(self.subnets)))
         for subnet in self.subnets:
             subnet.pretyPrint(level+4)

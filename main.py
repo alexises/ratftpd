@@ -9,6 +9,7 @@ from ratftpd.config import Config
 from ratftpd.server import RatftpServer
 from ratftpd.daemon import Daemon
 
+logger = logging.getLogger(__name__)
 class Ratftpd(object):
     def __init__(self):
         self.parseArg()
@@ -49,5 +50,6 @@ class Ratftpd(object):
         
 
 if __name__ == "__main__":
+    logger.info("start application")
     srv = Ratftpd()
     srv.run()
