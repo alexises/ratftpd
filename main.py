@@ -36,14 +36,16 @@ class Ratftpd(object):
                               self.config.port,
                               self.config.timeout,
                               self.config.retry)
+        logger.info("listen ok")
         if not self.foreground:
             self.daemon.start()
-        try: 
+        try:
+            logger.info("start server") 
             server.run()
         except KeyboardInterrupt:
             server.close()
         except Exception as e:
-            self.f.write(str(e))
+            logger.error(str(e))
         if not self.foreground:
             server.close()
             self.daemon.stop()

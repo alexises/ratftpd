@@ -1,5 +1,6 @@
 import sys, os, time, atexit
 import logging
+import os.path
 from signal import SIGTERM
  
 logger = logging.getLogger(__name__)
@@ -13,7 +14,7 @@ class Daemon(object):
         self.stdin = stdin
         self.stdout = stdout
         self.stderr = stderr
-        self.pidfile = pidfile
+        self.pidfile = os.path.abspath(pidfile)
  
     def daemonize(self):
         """
@@ -56,11 +57,13 @@ class Daemon(object):
         os.dup2(si.fileno(), sys.stdin.fileno())
         os.dup2(so.fileno(), sys.stdout.fileno())
         os.dup2(se.fileno(), sys.stderr.fileno())
+        logger.debug("close fd")
        
         # write pidfile
         atexit.register(self.delpid)
         pid = str(os.getpid())
         open(self.pidfile,'w+').write("%s\n" % pid)
+        
        
     def delpid(self):
         os.remove(self.pidfile)
