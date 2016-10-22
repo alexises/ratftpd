@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from os.path import isfile
 from sys import exit
 import json
+import logging
 
 from ratftpd.config import Config
 from ratftpd.server import RatftpServer
@@ -12,6 +13,7 @@ class Ratftpd(object):
     def __init__(self):
         self.parseArg()
         self.daemon = Daemon(self.config.pidfile)
+        logging.basicConfig(filename='myapp.log', level=logging.DEBUG)
 
     def parseArg(self):
         parser = ArgumentParser(description = "Real Advenced tftp server")
@@ -39,6 +41,8 @@ class Ratftpd(object):
             server.run()
         except KeyboardInterrupt:
             server.close()
+        except Exception as e:
+            self.f.write(str(e))
         if not self.foreground:
             server.close()
             self.daemon.stop()
