@@ -35,7 +35,8 @@ class Ratftpd(object):
         server = RatftpServer(self.config.bind,
                               self.config.port,
                               self.config.timeout,
-                              self.config.retry)
+                              self.config.retry,
+                              self.config)
         logger.info("listen ok")
         if not self.foreground:
             self.daemon.start()

@@ -13,6 +13,8 @@ class Config(object):
         self.retry = config.get("retry", 5)
         self.pidfile = config.get("pidfile", "ratftpd.pid")
         self.maxConn = config.get("maxConn", 65535)
+        self.blksize = config.get("blksize", None)
+
         networks = []
         for network in config.get('networks', []):
             networks.append(NetworkConfig(self, network))
@@ -60,6 +62,7 @@ class NetworkConfig(object):
         self.timeout = self._config.get('timeout', self.parent.timeout)
         self.retry = self._config.get('retry', self.parent.retry)
         self.maxConn = self._config.get('maxConn', self.parent.maxConn)
+        self.blksize = self._config.get('blksize', self.parent.blksize)
         del self._config
 
     def addChild(self, child):

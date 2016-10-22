@@ -11,6 +11,14 @@ class RatftpServerHandler(BaseHandler):
         self.config = config.getConfig(peer)
         super().__init__(server_addr, peer, path, options, stats_callback)
 
+    def _parse_options(self):
+        super()._parse_options()
+        if self.config.blksize is not None and \
+           'blksize' in self._options and \
+           self._options['blksize'] > self.config.blksize:
+            self._options['blksize'] = self.config.blksize
+
+
 class RatftpServer(BaseServer):
     ''' Base tftp server class '''
     def __init__(self, bind, port, timeout, retry, config):
