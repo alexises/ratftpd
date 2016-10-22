@@ -9,6 +9,7 @@ class Config(object):
         self.port = config.get("port", 69)
         self.timeout = config.get("timeout", 5)
         self.retry = config.get("retry", 5)
+        self.pidfile = config.get("pidfile", "ratftpd.pid")
         networks = []
         for network in config.get('networks', []):
             networks.append(NetworkConfig(self, network))
