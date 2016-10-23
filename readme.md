@@ -35,7 +35,7 @@ below a sample configuration file with default parameter
     "group" : "root",
     "network" : [
         {
-            "network" : "0.0.0.0/0"
+            "network" : "0.0.0.0/0",
             "blksize" : None,
             "basepath" : "/foo/bar/foobar",
             "timeout" : 5,
@@ -43,7 +43,7 @@ below a sample configuration file with default parameter
             "maxConn" : 65535
         },
         {
-            "network" : "192.168.0.0/22"
+            "network" : "192.168.0.0/22",
             "blksize" : 2048,
             "alias" : "foo",
             "timeout" : 10,
@@ -51,7 +51,7 @@ below a sample configuration file with default parameter
             "maxConn" : 19
         },
         {
-            "network" : "192.168.2.128/25"
+            "network" : "192.168.2.128/25",
             "blksize" : 1024,
             "alias" : "bar",
             "maxConn" : 5
