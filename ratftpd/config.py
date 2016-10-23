@@ -2,6 +2,7 @@ from ipaddress import ip_network, ip_address
 from functools import cmp_to_key
 import logging
 from threading import Lock
+import os.path
 
 logger = logging.getLogger(__name__)
 class Config(object):
@@ -15,6 +16,11 @@ class Config(object):
         self.pidfile = config.get("pidfile", "ratftpd.pid")
         self.maxConn = config.get("maxConn", 65535)
         self.blksize = config.get("blksize", None)
+        self.basepath = os.path.abspath(config.get("basepath", "tftproot"))
+        self.pathalias = config.get("pathalias", {})
+
+        for alias in self.pathAlias:
+            self.pathalias[alias] = os.path.join(self.basepath, self.pathAlias[alias])
 
         networks = []
         for network in config.get('networks', []):
@@ -63,6 +69,14 @@ class NetworkConfig(object):
             raise ValueError('network argument is required for a network entry')
         self.network = ip_network(config['network'])
         self.subnets = []
+        if 'basepath' in config:
+            self.basepath = config['basepath']
+        elif 'alias' in config:
+            if config['alias'] not in parent.pathalias:
+               raise ValueError("alias {} not present".format(config['alias'])
+            self.basepath = parent.pathalias(config['alias'])
+        else:
+            self.basepath = parent.basepath
         self._config = config
         self._connLock = Lock()
 

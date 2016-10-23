@@ -37,7 +37,7 @@ class RatftpServerHandler(BaseHandler):
 
     def get_response_date():
         self.config.addConnection()
-        return RatftpServerFile(self.config.basePath)
+        return RatftpServerFile(self.config.basepath, self.path, self.config)
 
 
 class RatftpServer(BaseServer):
