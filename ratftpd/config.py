@@ -1,6 +1,7 @@
 from ipaddress import ip_network, ip_address
 from functools import cmp_to_key
 import logging
+from threading import Lock
 
 logger = logging.getLogger(__name__)
 class Config(object):
@@ -48,6 +49,12 @@ class Config(object):
         return config
                     
 
+class NoSlotAvailable(Exception):
+    def __init__(self, network, childs):
+        super().__init__("max number of connexion for {0}".format(network))
+        self.network = network
+        self.childs = childs
+
 class NetworkConfig(object):
     ''' manage a configuration for a network '''
 
@@ -57,6 +64,7 @@ class NetworkConfig(object):
         self.network = ip_network(config['network'])
         self.subnets = []
         self._config = config
+        self._connLock = Lock()
 
     def _setConfig(self):
         self.timeout = self._config.get('timeout', self.parent.timeout)
@@ -67,6 +75,32 @@ class NetworkConfig(object):
 
     def addChild(self, child):
         self.subnets.append(child)
+
+    def addConnection(self):
+        subnets = []
+        elem = self
+        while elem != None:
+            subnets.append(elem)
+            elem._connLock.acquire()
+            if elem.maxConn > 0:
+                logger.debug("nex slot avaliable for {} network is {}".format(elem.network, elem.maxConn)
+            else:
+                logger.error("max number of connection reached")
+                for subnet in subnets:
+                    subnet._connLock.release()
+                raise NoSlotAvailable(elem, subnets)
+            elem = elem.parent
+        logger.info("max connection countion downgraded")
+        for subnet in subnets:
+            subnet.maxConn -= 1
+            elem._connLock.release()
+
+    def delConnection(self):
+        elem = self
+        while elem != None:
+            with elem._connLock:
+                elem.maxConn +=1
+            elem = elem.parent
 
     def makeTree(self, parent):
         refIndex = 0
