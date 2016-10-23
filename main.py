@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class Ratftpd(object):
     def __init__(self):
         self.parseArg()
-        self.daemon = Daemon(self.config.pidfile)
+        self.daemon = Daemon(self.config.pidfile, uid=self.config.uid, gid=self.config.gid)
         logging.basicConfig(filename='myapp.log', level=logging.DEBUG)
 
     def parseArg(self):
@@ -40,6 +40,9 @@ class Ratftpd(object):
         logger.info("listen ok")
         if not self.foreground:
             self.daemon.start()
+            logger.info("daemon started")
+            self.daemon.dropPrivilege()
+            logger.info("drop privilege")
         try:
             logger.info("start server") 
             server.run()

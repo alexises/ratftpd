@@ -1,6 +1,7 @@
 import sys, os, time, atexit
 import logging
 import os.path
+import os
 from signal import SIGTERM
  
 logger = logging.getLogger(__name__)
@@ -10,11 +11,13 @@ class Daemon(object):
        
     Usage: subclass the Daemon class and override the run() method
     """
-    def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null'):
+    def __init__(self, pidfile, stdin='/dev/null', stdout='/dev/null', stderr='/dev/null', uid=os.getuid(), gid=os.getgid()):
         self.stdin = stdin
         self.stdout = stdout
         self.stderr = stderr
         self.pidfile = os.path.abspath(pidfile)
+        self.uid = uid
+        self.gid = gid
  
     def daemonize(self):
         """
@@ -64,10 +67,17 @@ class Daemon(object):
         pid = str(os.getpid())
         open(self.pidfile,'w+').write("%s\n" % pid)
         
-       
     def delpid(self):
         os.remove(self.pidfile)
  
+    def dropPrivilege(self):
+        if os.getuid() != 0:
+            return
+        if os.getgid() != self.gid:
+            os.setgid(self.gid)
+        if os.getuid() != self.uid:
+            os.setuid(self.uid)
+
     def start(self):
         """
         Start the daemon

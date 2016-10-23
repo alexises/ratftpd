@@ -3,6 +3,9 @@ from functools import cmp_to_key
 import logging
 from threading import Lock
 import os.path
+import os
+import pwd
+import grp
 
 logger = logging.getLogger(__name__)
 class Config(object):
@@ -18,8 +21,10 @@ class Config(object):
         self.blksize = config.get("blksize", None)
         self.basepath = os.path.abspath(config.get("basepath", "tftproot"))
         self.pathalias = config.get("pathalias", {})
+        self.uid = pwd.getpwnam(config.get("user", pwd.getpwuid(os.getuid()).pw_name)).pw_uid
+        self.gid = grp.getgrnam(config.get("group", grp.getgrgid(os.getgid()).gr_name)).gr_gid
 
-        for alias in self.pathAlias:
+        for alias in self.pathalias:
             self.pathalias[alias] = os.path.join(self.basepath, self.pathAlias[alias])
 
         networks = []
@@ -73,7 +78,7 @@ class NetworkConfig(object):
             self.basepath = config['basepath']
         elif 'alias' in config:
             if config['alias'] not in parent.pathalias:
-               raise ValueError("alias {} not present".format(config['alias'])
+               raise ValueError("alias {} not present".format(config['alias']))
             self.basepath = parent.pathalias(config['alias'])
         else:
             self.basepath = parent.basepath
@@ -97,7 +102,7 @@ class NetworkConfig(object):
             subnets.append(elem)
             elem._connLock.acquire()
             if elem.maxConn > 0:
-                logger.debug("nex slot avaliable for {} network is {}".format(elem.network, elem.maxConn)
+                logger.debug("nex slot avaliable for {} network is {}".format(elem.network, elem.maxConn))
             else:
                 logger.error("max number of connection reached")
                 for subnet in subnets:
